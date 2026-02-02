@@ -1,6 +1,9 @@
 import { StyleSheet, Text, View, Image } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 export default function SplashScreen() {
+  const { t } = useTranslation();
+
   return (
     <View style={styles.container}>
       <Image
@@ -8,8 +11,8 @@ export default function SplashScreen() {
         style={styles.logo}
         resizeMode="contain"
       />
-      <Text style={styles.title}>Lost Ruins of Arnak</Text>
-      <Text style={styles.subtitle}>Calculator</Text>
+      <Text style={styles.title}>{t('splash.title')}</Text>
+      <Text style={styles.subtitle}>{t('splash.subtitle')}</Text>
     </View>
   );
 }

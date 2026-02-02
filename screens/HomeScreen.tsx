@@ -1,5 +1,6 @@
 import { StyleSheet, Text, View, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import Constants from 'expo-constants';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../App';
@@ -8,6 +9,8 @@ import { colors } from '../theme';
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 export default function HomeScreen({ navigation }: Props) {
+  const { t } = useTranslation();
+
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
       <View style={styles.container}>
@@ -21,13 +24,13 @@ export default function HomeScreen({ navigation }: Props) {
             style={styles.button}
             onPress={() => navigation.navigate('SelectPlayers')}
           >
-            <Text style={styles.buttonText}>New Game</Text>
+            <Text style={styles.buttonText}>{t('home.newGame')}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.button}
             onPress={() => navigation.navigate('History')}
           >
-            <Text style={styles.buttonText}>History</Text>
+            <Text style={styles.buttonText}>{t('home.history')}</Text>
           </TouchableOpacity>
         </View>
         <Text style={styles.version}>v{Constants.expoConfig?.version}</Text>

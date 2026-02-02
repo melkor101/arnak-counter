@@ -8,6 +8,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../App';
@@ -16,17 +17,17 @@ import type { Player } from '../types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'SelectPlayers'>;
 
-const defaultPlayers: Player[] = [
-  { name: 'Player 1', color: 'red' },
-  { name: 'Player 2', color: 'blue' },
-];
-
 const MAX_PLAYERS = 4;
 
 const colorOptions: PlayerColor[] = ['red', 'blue', 'green', 'yellow'];
 
 export default function SelectPlayersScreen({ navigation }: Props) {
-  const [players, setPlayers] = useState<Player[]>(defaultPlayers);
+  const { t } = useTranslation();
+
+  const [players, setPlayers] = useState<Player[]>(() => [
+    { name: t('selectPlayers.playerPlaceholder', { number: 1 }), color: 'red' as PlayerColor },
+    { name: t('selectPlayers.playerPlaceholder', { number: 2 }), color: 'blue' as PlayerColor },
+  ]);
   const [lockedColors, setLockedColors] = useState<Set<number>>(new Set());
 
   const updatePlayerName = (index: number, name: string) => {
@@ -67,7 +68,7 @@ export default function SelectPlayersScreen({ navigation }: Props) {
     const usedColors = players.map((p) => p.color);
     const availableColor = colorOptions.find((c) => !usedColors.includes(c)) || 'red';
     const newPlayerNumber = players.length + 1;
-    setPlayers([...players, { name: `Player ${newPlayerNumber}`, color: availableColor }]);
+    setPlayers([...players, { name: t('selectPlayers.playerPlaceholder', { number: newPlayerNumber }), color: availableColor }]);
   };
 
   const removePlayer = (index: number) => {
@@ -103,9 +104,9 @@ export default function SelectPlayersScreen({ navigation }: Props) {
     <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.backButton}>{'< Back'}</Text>
+          <Text style={styles.backButton}>{t('common.back')}</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Select Players</Text>
+        <Text style={styles.headerTitle}>{t('selectPlayers.title')}</Text>
         <View style={styles.headerSpacer} />
       </View>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.container}>
@@ -113,7 +114,7 @@ export default function SelectPlayersScreen({ navigation }: Props) {
           <View key={index} style={styles.playerRow}>
             <TextInput
               style={styles.input}
-              placeholder={`Player ${index + 1}`}
+              placeholder={t('selectPlayers.playerPlaceholder', { number: index + 1 })}
               placeholderTextColor={colors.textSecondary}
               value={player.name}
               onChangeText={(text) => updatePlayerName(index, text)}
@@ -153,7 +154,7 @@ export default function SelectPlayersScreen({ navigation }: Props) {
         {players.length < MAX_PLAYERS && (
           <TouchableOpacity style={styles.addPlayerButton} onPress={addPlayer}>
             <MaterialCommunityIcons name="plus" size={24} color={colors.textPrimary} />
-            <Text style={styles.addPlayerText}>Add Player</Text>
+            <Text style={styles.addPlayerText}>{t('selectPlayers.addPlayer')}</Text>
           </TouchableOpacity>
         )}
         <TouchableOpacity
@@ -161,7 +162,7 @@ export default function SelectPlayersScreen({ navigation }: Props) {
           onPress={handleStartGame}
           disabled={!hasSelectedPlayers}
         >
-          <Text style={styles.buttonText}>Start Game</Text>
+          <Text style={styles.buttonText}>{t('selectPlayers.startGame')}</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>

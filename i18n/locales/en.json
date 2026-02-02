@@ -1,0 +1,38 @@
+{
+  "common": {
+    "back": "< Back",
+    "save": "Save",
+    "cancel": "Cancel"
+  },
+  "splash": {
+    "title": "Lost Ruins of Arnak",
+    "subtitle": "Calculator"
+  },
+  "home": {
+    "newGame": "New Game",
+    "history": "History"
+  },
+  "selectPlayers": {
+    "title": "Select Players",
+    "playerPlaceholder": "Player {{number}}",
+    "addPlayer": "Add Player",
+    "startGame": "Start Game"
+  },
+  "calculate": {
+    "title": "Calculate Score",
+    "saveAndFinish": "Save & Finish"
+  },
+  "history": {
+    "title": "History",
+    "gameHistory": "Game History",
+    "emptyMessage": "Your past games will appear here"
+  },
+  "categories": {
+    "research": "Research",
+    "artifacts": "Artifacts",
+    "idols": "Idols",
+    "items": "Items",
+    "cards": "Cards",
+    "fear": "Fear"
+  }
+}

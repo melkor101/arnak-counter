@@ -10,6 +10,7 @@ import {
   ImageSourcePropType,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../App';
@@ -32,6 +33,7 @@ const scoreCategories = [
 ];
 
 export default function CalculateScreen({ navigation, route }: Props) {
+  const { t } = useTranslation();
   const { players } = route.params;
 
   const [scores, setScores] = useState<number[][]>(
@@ -54,9 +56,9 @@ export default function CalculateScreen({ navigation, route }: Props) {
     <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.backButton}>{'< Back'}</Text>
+          <Text style={styles.backButton}>{t('common.back')}</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Calculate Score</Text>
+        <Text style={styles.headerTitle}>{t('calculate.title')}</Text>
         <View style={styles.headerSpacer} />
       </View>
       <ScrollView style={styles.scrollView}>
@@ -132,7 +134,7 @@ export default function CalculateScreen({ navigation, route }: Props) {
             style={styles.button}
             onPress={() => navigation.navigate('Home')}
           >
-            <Text style={styles.buttonText}>Save & Finish</Text>
+            <Text style={styles.buttonText}>{t('calculate.saveAndFinish')}</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

@@ -1,0 +1,38 @@
+{
+  "common": {
+    "back": "< Wstecz",
+    "save": "Zapisz",
+    "cancel": "Anuluj"
+  },
+  "splash": {
+    "title": "Zaginione Ruiny Arnak",
+    "subtitle": "Kalkulator"
+  },
+  "home": {
+    "newGame": "Nowa Gra",
+    "history": "Historia"
+  },
+  "selectPlayers": {
+    "title": "Wybierz Graczy",
+    "playerPlaceholder": "Gracz {{number}}",
+    "addPlayer": "Dodaj Gracza",
+    "startGame": "Rozpocznij Grę"
+  },
+  "calculate": {
+    "title": "Oblicz Wynik",
+    "saveAndFinish": "Zapisz i Zakończ"
+  },
+  "history": {
+    "title": "Historia",
+    "gameHistory": "Historia Gier",
+    "emptyMessage": "Twoje poprzednie gry pojawią się tutaj"
+  },
+  "categories": {
+    "research": "Badania",
+    "artifacts": "Artefakty",
+    "idols": "Idole",
+    "items": "Przedmioty",
+    "cards": "Karty",
+    "fear": "Strach"
+  }
+}

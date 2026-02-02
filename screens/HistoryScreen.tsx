@@ -1,5 +1,6 @@
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../App';
 import { colors } from '../theme';
@@ -7,19 +8,21 @@ import { colors } from '../theme';
 type Props = NativeStackScreenProps<RootStackParamList, 'History'>;
 
 export default function HistoryScreen({ navigation }: Props) {
+  const { t } = useTranslation();
+
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.backButton}>{'< Back'}</Text>
+          <Text style={styles.backButton}>{t('common.back')}</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>History</Text>
+        <Text style={styles.headerTitle}>{t('history.title')}</Text>
         <View style={styles.headerSpacer} />
       </View>
       <View style={styles.container}>
         <View style={styles.card}>
-          <Text style={styles.title}>Game History</Text>
-          <Text style={styles.subtitle}>Your past games will appear here</Text>
+          <Text style={styles.title}>{t('history.gameHistory')}</Text>
+          <Text style={styles.subtitle}>{t('history.emptyMessage')}</Text>
         </View>
       </View>
     </SafeAreaView>
