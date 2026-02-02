@@ -1,12 +1,64 @@
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { useState } from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  TextInput,
+  ScrollView,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../App';
-import { colors } from '../theme';
+import { colors, playerColors, PlayerColor } from '../theme';
+import type { Player } from '../types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'SelectPlayers'>;
 
+const defaultPlayers: Player[] = [
+  { name: '', color: 'red' },
+  { name: '', color: 'blue' },
+  { name: '', color: 'green' },
+  { name: '', color: 'yellow' },
+];
+
+const colorOptions: PlayerColor[] = ['red', 'blue', 'green', 'yellow'];
+
 export default function SelectPlayersScreen({ navigation }: Props) {
+  const [players, setPlayers] = useState<Player[]>(defaultPlayers);
+
+  const updatePlayerName = (index: number, name: string) => {
+    const newPlayers = [...players];
+    newPlayers[index] = { ...newPlayers[index], name };
+    setPlayers(newPlayers);
+  };
+
+  const updatePlayerColor = (index: number, color: PlayerColor) => {
+    const newPlayers = [...players];
+    newPlayers[index] = { ...newPlayers[index], color };
+    setPlayers(newPlayers);
+  };
+
+  const clearPlayer = (index: number) => {
+    const newPlayers = [...players];
+    newPlayers[index] = { ...newPlayers[index], name: '' };
+    setPlayers(newPlayers);
+  };
+
+  const selectedPlayers = players.filter((p) => p.name.trim() !== '');
+  const hasSelectedPlayers = selectedPlayers.length > 0;
+
+  const handleStartGame = () => {
+    navigation.navigate('Calculate', { players: selectedPlayers });
+  };
+
+  const isColorTaken = (color: PlayerColor, currentIndex: number) => {
+    return players.some(
+      (p, i) => i !== currentIndex && p.name.trim() !== '' && p.color === color
+    );
+  };
+
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
       <View style={styles.header}>
@@ -16,18 +68,63 @@ export default function SelectPlayersScreen({ navigation }: Props) {
         <Text style={styles.headerTitle}>Select Players</Text>
         <View style={styles.headerSpacer} />
       </View>
-      <View style={styles.container}>
-        <View style={styles.card}>
-          <Text style={styles.title}>Select Players</Text>
-          <Text style={styles.subtitle}>Choose who is playing</Text>
-        </View>
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.container}>
+        {players.map((player, index) => (
+          <View key={index} style={styles.playerRow}>
+            <View style={styles.checkboxContainer}>
+              {player.name.trim() !== '' && (
+                <View style={styles.checkbox}>
+                  <Text style={styles.checkmark}>✓</Text>
+                </View>
+              )}
+            </View>
+            <TextInput
+              style={styles.input}
+              placeholder={`Player ${index + 1}`}
+              placeholderTextColor={colors.textSecondary}
+              value={player.name}
+              onChangeText={(text) => updatePlayerName(index, text)}
+            />
+            <View style={styles.colorSelector}>
+              {colorOptions.map((color) => {
+                const taken = isColorTaken(color, index);
+                const isSelected = player.color === color;
+                return (
+                  <TouchableOpacity
+                    key={color}
+                    style={[
+                      styles.colorOption,
+                      isSelected && styles.colorSelected,
+                      taken && styles.colorDisabled,
+                    ]}
+                    onPress={() => !taken && updatePlayerColor(index, color)}
+                    disabled={taken}
+                  >
+                    <MaterialCommunityIcons
+                      name="account"
+                      size={26}
+                      color={playerColors[color]}
+                    />
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+            <TouchableOpacity
+              style={styles.clearButton}
+              onPress={() => clearPlayer(index)}
+            >
+              <Text style={styles.clearButtonText}>✕</Text>
+            </TouchableOpacity>
+          </View>
+        ))}
         <TouchableOpacity
-          style={styles.button}
-          onPress={() => navigation.navigate('Calculate')}
+          style={[styles.button, !hasSelectedPlayers && styles.buttonDisabled]}
+          onPress={handleStartGame}
+          disabled={!hasSelectedPlayers}
         >
           <Text style={styles.buttonText}>Start Game</Text>
         </TouchableOpacity>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -58,36 +155,87 @@ const styles = StyleSheet.create({
   headerSpacer: {
     width: 50,
   },
-  container: {
+  scrollView: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
     backgroundColor: colors.background,
   },
-  card: {
-    backgroundColor: colors.cardBackground,
-    padding: 30,
-    borderRadius: 15,
-    marginBottom: 40,
-    borderWidth: 3,
-    borderColor: colors.cardBorder,
+  container: {
+    padding: 20,
+    paddingBottom: 40,
+  },
+  playerRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 8,
+    backgroundColor: colors.cardBackground,
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 15,
+    borderWidth: 2,
+    borderColor: colors.cardBorder,
   },
-  title: {
-    fontSize: 28,
+  checkboxContainer: {
+    width: 28,
+    height: 28,
+    marginRight: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkbox: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#43A047',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkmark: {
+    color: '#fff',
+    fontSize: 14,
     fontWeight: 'bold',
-    color: colors.textPrimary,
-    marginBottom: 10,
   },
-  subtitle: {
+  input: {
+    flex: 1,
+    height: 40,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    paddingHorizontal: 12,
     fontSize: 16,
-    color: colors.textSecondary,
+    color: colors.textPrimary,
+    marginRight: 10,
+  },
+  colorSelector: {
+    flexDirection: 'row',
+    gap: 4,
+  },
+  colorOption: {
+    width: 32,
+    height: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  colorSelected: {
+    borderColor: colors.textPrimary,
+    backgroundColor: 'rgba(0,0,0,0.1)',
+  },
+  colorDisabled: {
+    opacity: 0.3,
+  },
+  clearButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(0,0,0,0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 10,
+  },
+  clearButtonText: {
+    color: colors.textPrimary,
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   button: {
     backgroundColor: 'transparent',
@@ -96,6 +244,11 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     borderWidth: 2,
     borderColor: colors.buttonBorder,
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  buttonDisabled: {
+    opacity: 0.5,
   },
   buttonText: {
     color: colors.textPrimary,
