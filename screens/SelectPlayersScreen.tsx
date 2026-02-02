@@ -17,16 +17,17 @@ import type { Player } from '../types';
 type Props = NativeStackScreenProps<RootStackParamList, 'SelectPlayers'>;
 
 const defaultPlayers: Player[] = [
-  { name: '', color: 'red' },
-  { name: '', color: 'blue' },
-  { name: '', color: 'green' },
-  { name: '', color: 'yellow' },
+  { name: 'Player 1', color: 'red' },
+  { name: 'Player 2', color: 'blue' },
 ];
+
+const MAX_PLAYERS = 4;
 
 const colorOptions: PlayerColor[] = ['red', 'blue', 'green', 'yellow'];
 
 export default function SelectPlayersScreen({ navigation }: Props) {
   const [players, setPlayers] = useState<Player[]>(defaultPlayers);
+  const [lockedColors, setLockedColors] = useState<Set<number>>(new Set());
 
   const updatePlayerName = (index: number, name: string) => {
     const newPlayers = [...players];
@@ -36,13 +37,52 @@ export default function SelectPlayersScreen({ navigation }: Props) {
 
   const updatePlayerColor = (index: number, color: PlayerColor) => {
     const newPlayers = [...players];
+
+    // If another player has this color and hasn't locked it, reassign them
+    const otherPlayerIndex = newPlayers.findIndex(
+      (p, i) => i !== index && p.color === color
+    );
+    if (otherPlayerIndex !== -1 && !lockedColors.has(otherPlayerIndex)) {
+      const usedColors = newPlayers
+        .filter((_, i) => i !== otherPlayerIndex && i !== index)
+        .map((p) => p.color);
+      usedColors.push(color); // The color being taken
+      const availableColor = colorOptions.find((c) => !usedColors.includes(c)) || 'red';
+      newPlayers[otherPlayerIndex] = { ...newPlayers[otherPlayerIndex], color: availableColor };
+    }
+
     newPlayers[index] = { ...newPlayers[index], color };
     setPlayers(newPlayers);
+    setLockedColors(new Set(lockedColors).add(index));
   };
 
   const clearPlayer = (index: number) => {
     const newPlayers = [...players];
     newPlayers[index] = { ...newPlayers[index], name: '' };
+    setPlayers(newPlayers);
+  };
+
+  const addPlayer = () => {
+    if (players.length >= MAX_PLAYERS) return;
+    const usedColors = players.map((p) => p.color);
+    const availableColor = colorOptions.find((c) => !usedColors.includes(c)) || 'red';
+    const newPlayerNumber = players.length + 1;
+    setPlayers([...players, { name: `Player ${newPlayerNumber}`, color: availableColor }]);
+  };
+
+  const removePlayer = (index: number) => {
+    if (players.length <= 2) return;
+    const newPlayers = players.filter((_, i) => i !== index);
+    // Update locked colors indices
+    const newLockedColors = new Set<number>();
+    lockedColors.forEach((lockedIndex) => {
+      if (lockedIndex < index) {
+        newLockedColors.add(lockedIndex);
+      } else if (lockedIndex > index) {
+        newLockedColors.add(lockedIndex - 1);
+      }
+    });
+    setLockedColors(newLockedColors);
     setPlayers(newPlayers);
   };
 
@@ -55,7 +95,7 @@ export default function SelectPlayersScreen({ navigation }: Props) {
 
   const isColorTaken = (color: PlayerColor, currentIndex: number) => {
     return players.some(
-      (p, i) => i !== currentIndex && p.name.trim() !== '' && p.color === color
+      (p, i) => i !== currentIndex && lockedColors.has(i) && p.color === color
     );
   };
 
@@ -71,13 +111,6 @@ export default function SelectPlayersScreen({ navigation }: Props) {
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.container}>
         {players.map((player, index) => (
           <View key={index} style={styles.playerRow}>
-            <View style={styles.checkboxContainer}>
-              {player.name.trim() !== '' && (
-                <View style={styles.checkbox}>
-                  <Text style={styles.checkmark}>✓</Text>
-                </View>
-              )}
-            </View>
             <TextInput
               style={styles.input}
               placeholder={`Player ${index + 1}`}
@@ -111,12 +144,18 @@ export default function SelectPlayersScreen({ navigation }: Props) {
             </View>
             <TouchableOpacity
               style={styles.clearButton}
-              onPress={() => clearPlayer(index)}
+              onPress={() => players.length > 2 ? removePlayer(index) : clearPlayer(index)}
             >
               <Text style={styles.clearButtonText}>✕</Text>
             </TouchableOpacity>
           </View>
         ))}
+        {players.length < MAX_PLAYERS && (
+          <TouchableOpacity style={styles.addPlayerButton} onPress={addPlayer}>
+            <MaterialCommunityIcons name="plus" size={24} color={colors.textPrimary} />
+            <Text style={styles.addPlayerText}>Add Player</Text>
+          </TouchableOpacity>
+        )}
         <TouchableOpacity
           style={[styles.button, !hasSelectedPlayers && styles.buttonDisabled]}
           onPress={handleStartGame}
@@ -167,37 +206,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.cardBackground,
-    borderRadius: 12,
+    borderRadius: 6,
     padding: 12,
     marginBottom: 15,
     borderWidth: 2,
     borderColor: colors.cardBorder,
   },
-  checkboxContainer: {
-    width: 28,
-    height: 28,
-    marginRight: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  checkbox: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: '#43A047',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  checkmark: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
   input: {
     flex: 1,
     height: 40,
     backgroundColor: '#fff',
-    borderRadius: 8,
+    borderRadius: 4,
     paddingHorizontal: 12,
     fontSize: 16,
     color: colors.textPrimary,
@@ -212,7 +231,7 @@ const styles = StyleSheet.create({
     height: 32,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 6,
+    borderRadius: 4,
     borderWidth: 2,
     borderColor: 'transparent',
   },
@@ -226,7 +245,7 @@ const styles = StyleSheet.create({
   clearButton: {
     width: 32,
     height: 32,
-    borderRadius: 16,
+    borderRadius: 6,
     backgroundColor: 'rgba(0,0,0,0.1)',
     justifyContent: 'center',
     alignItems: 'center',
@@ -237,11 +256,29 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  addPlayerButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.cardBackground,
+    borderRadius: 6,
+    padding: 12,
+    marginBottom: 15,
+    borderWidth: 2,
+    borderColor: colors.cardBorder,
+    borderStyle: 'dashed',
+  },
+  addPlayerText: {
+    color: colors.textPrimary,
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 8,
+  },
   button: {
     backgroundColor: 'transparent',
     paddingVertical: 15,
     paddingHorizontal: 40,
-    borderRadius: 25,
+    borderRadius: 8,
     borderWidth: 2,
     borderColor: colors.buttonBorder,
     alignItems: 'center',
